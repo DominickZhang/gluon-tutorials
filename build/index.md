@@ -20,7 +20,7 @@ chapters and entire sections with experts and community members. Already we've
 received contributions spanning typo corrections through full working examples.
 
 - A printable [PDF version](./gluon_tutorials.pdf)
-- Download all jupyter notebooks [zip](), [tar.gz]()
+- Download all jupyter notebooks [zip](./gluon_tutorials.zip), [tar.gz](./gluon_tutorials.tar.gz)
 
 ```eval_rst
 
