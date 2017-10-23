@@ -40,8 +40,7 @@ html: $(DEPS) $(OBJ)
 
 latex: $(DEPS) $(OBJ)
 	make -C build latex
-	cd build/_build/latex
-	make
+	cd build/_build/latex; make
 
 clean:
 	rm -rf build/chapter* $(DEPS) $(PKG)
