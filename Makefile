@@ -29,7 +29,7 @@ build/_build/html/gluon_tutorials.tar.gz: $(OBJ) $(DEPS)
 
 build/%: %
 	@mkdir -p $(@D)
-	@cp $< $@
+	@cp -r $< $@
 
 html: $(DEPS) $(OBJ)
 	make -C build html
