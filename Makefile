@@ -28,6 +28,7 @@ build/_build/html/gluon_tutorials.tar.gz: $(OBJ) $(DEPS)
 	cd build; tar -zcvf $(patsubst build/%, %, $@ $(DEPS)) chapter*
 
 build/%: %
+	@mkdir -p $(@D)
 	@cp $< $@
 
 html: $(DEPS) $(OBJ)
