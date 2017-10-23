@@ -14,7 +14,8 @@ NOTEBOOK = $(filter-out $(MARKDOWN), $(wildcard chapter*/*.md))
 OBJ = $(patsubst %.md, build/%.md, $(MARKDOWN)) \
 	$(patsubst %.md, build/%.ipynb, $(NOTEBOOK))
 
-DEPS = build/img build/data build/environment.yml build/utils.py build/README.md
+DEPS = $(wildcard build/img/*) $(wildcard build/data/*) \
+	build/environment.yml build/utils.py build/README.md
 
 PKG = build/_build/html/gluon_tutorials.tar.gz build/_build/html/gluon_tutorials.zip
 
@@ -29,16 +30,10 @@ build/_build/html/gluon_tutorials.tar.gz: $(OBJ) $(DEPS)
 build/%: %
 	@cp $< $@
 
-build/img:
-	rsync -rupE img build/
-
-build/data:
-	rsync -rupE data build/
-
 html: $(DEPS) $(OBJ)
 	make -C build html
 
-latex: $(DEPS) $(OBJ)
+pdf: $(DEPS) $(OBJ)
 	make -C build latex
 	cd build/_build/latex; make
 

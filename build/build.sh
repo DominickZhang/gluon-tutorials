@@ -13,7 +13,7 @@ make html
 rm -rf build/data
 make pkg
 
-make latex
+make pdf
 cp build/_build/latex/gluon_tutorials.pdf build/_build/html/
 
 aws s3 sync --delete build/_build/html/ s3://tutorials.gluon.ai/ --acl public-read
