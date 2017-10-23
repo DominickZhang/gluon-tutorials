@@ -61,7 +61,7 @@ source_suffix = ['.rst', '.ipynb', '.md']
 master_doc = 'index'
 
 # General information about the project.
-project = '动手学深度学习'
+project = 'Deep Learning - The Straight Dope'
 copyright = '2017, Contributors'
 author = "MXNet Community"
 
