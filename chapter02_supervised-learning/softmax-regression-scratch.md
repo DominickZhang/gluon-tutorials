@@ -1,11 +1,11 @@
 # Multiclass logistic regression from scratch
 
-If you've made it through our tutorial on linear regression from scratch, then you're past the hardest part. You already know how to load and manipulate data, build computation graphs on the fly, and take derivatives. You also know how to define a loss function, construct a model, and write your own optimizer. 
+If you've made it through our tutorial on linear regression from scratch, then you're past the hardest part. You already know how to load and manipulate data, build computation graphs on the fly, and take derivatives. You also know how to define a loss function, construct a model, and write your own optimizer.
 
 Nearly all neural networks that we'll build in the real world consist of these same fundamental parts. The main differences will be the type and scale of the data, and the complexity of the models. And every year or two, a new hipster optimizer comes around, but at their core they're all subtle variations of stochastic gradient descent.
 
 So let's work on a more interesting problem now. We're going to classify images of handwritten digits like these:
-![png](https://raw.githubusercontent.com/dmlc/web-data/master/mxnet/example/mnist.png) 
+![png](https://raw.githubusercontent.com/dmlc/web-data/master/mxnet/example/mnist.png)
 We're going to implement a model called multiclass logistic regression. Other common names for this model include softmax regression and multinomial regression. To start, let's import our bag of libraries.
 
 ```{.python .input}
@@ -13,6 +13,9 @@ from __future__ import print_function
 import mxnet as mx
 from mxnet import nd, autograd
 import numpy as np
+import sys
+sys.path.append('..')
+import utils
 ```
 
 We'll also want to set the compute context for our modeling. Feel free to go ahead and change this to mx.gpu(0) if you're running on an appropriately endowed machine.
@@ -47,7 +50,6 @@ Note that each image has been formatted as a 3-tuple (height, width, channel). F
 
 Generally, we don't want our model code to care too much about the exact shape of our input data. This way we could switch in a different dataset without changing the code that follows. Let's define variables to hold the number of inputs and outputs.
 
-
 ```{.python .input}
 num_inputs = 784
 num_outputs = 10
@@ -68,26 +70,27 @@ plt.imshow(im.asnumpy())
 plt.show()
 ```
 
-Ok, that's a beautiful five. 
+Ok, that's a beautiful five.
 
 ## Load the data iterator
 
-Now let's load these images into a data iterator so we don't have to do the heavy lifting. 
+Now let's load these images into a data iterator so we don't have to do the heavy lifting.
 
 ```{.python .input}
 batch_size = 64
-train_data = mx.gluon.data.DataLoader(mnist_train, batch_size, shuffle=True)
+
+train_data = utils.DataLoader(mnist_train[:][0], mnist_train[:][1], batch_size, shuffle=True)
 ```
 
 We're also going to want to load up an iterator with *test* data. After we train on the training dataset we're going to want to test our model on the test data. Otherwise, for all we know, our model could be doing something stupid (or treacherous?) like memorizing the training examples and regurgitating the labels on command.
 
 ```{.python .input}
-test_data = mx.gluon.data.DataLoader(mnist_test, batch_size, shuffle=False)
+test_data = utils.DataLoader(mnist_test[:][0], mnist_test[:][1], batch_size, shuffle=False)
 ```
 
 ## Allocate model parameters
 
-Now we're going to define our model. For this example, we're going to ignore the multimodal structure of our data and just flatten each image into a single 1D vector with 28x28 = 784 components. 
+Now we're going to define our model. For this example, we're going to ignore the multimodal structure of our data and just flatten each image into a single 1D vector with 28x28 = 784 components.
 
 Because our task is multiclass classification, we want to assign a probability to each of the classes P(Y=c|X) given the input X. In order to do this we're going to need one vector of 784 weights for each class, connecting each feature to the corresponding output. Because there are 10 classes, we can collect these weights together in a 784 by 10 matrix.
 
@@ -109,11 +112,9 @@ for param in params:
 
 ## Multiclass logistic regression
 
-In the linear regression tutorial, we performed regression, so we had just one output *yhat* and tried to push this value as close as possible to the true target *y*. Here, instead of regression, we are performing *classification*, where we want to assign each input *X* to one of *L* classes. 
+In the linear regression tutorial, we performed regression, so we had just one output *yhat* and tried to push this value as close as possible to the true target *y*. Here, instead of regression, we are performing *classification*, where we want to assign each input *X* to one of *L* classes.
 
 The basic modeling idea is that we're going to linearly map our input *X* onto 10 different real valued outputs ``y_linear``. Then before, outputting these values, we'll want to normalize them so that they are non-negative and sum to 1. This normalization allows us to interpret the output yhat as a valid probability distribution.
-
-
 
 ```{.python .input}
 def softmax(y_linear):
@@ -128,7 +129,7 @@ sample_yhat = softmax(sample_y_linear)
 print(sample_yhat)
 ```
 
-Let's confirm that indeed all of our rows sum to 1. 
+Let's confirm that indeed all of our rows sum to 1.
 
 ```{.python .input}
 print(nd.sum(sample_yhat, axis=1))
@@ -149,11 +150,11 @@ def net(X):
 
 ## The  cross-entropy loss function
 
-Before we can start training, we're going to need to define a loss function that makes sense when our prediction is a  probability distribution. 
+Before we can start training, we're going to need to define a loss function that makes sense when our prediction is a  probability distribution.
 
-The relevant loss function here is called cross-entropy and it may be the most common loss function you'll find in all of deep learning. That's because at the moment, classification problems tend to be far more abundant than regression problems. 
+The relevant loss function here is called cross-entropy and it may be the most common loss function you'll find in all of deep learning. That's because at the moment, classification problems tend to be far more abundant than regression problems.
 
-The basic idea is that we're going to take a target Y that has been formatted as a one-hot vector, meaning one value corresponding to the correct label is set to 1 and the others are set to 0, e.g. ``[0, 1, 0, 0, 0, 0, 0, 0, 0, 0]``. 
+The basic idea is that we're going to take a target Y that has been formatted as a one-hot vector, meaning one value corresponding to the correct label is set to 1 and the others are set to 0, e.g. ``[0, 1, 0, 0, 0, 0, 0, 0, 0, 0]``.
 
 
 The basic idea of cross-entropy loss is that we only care about how much probability the prediction assigned to the correct label. In other words, for true label 2, we only care about the component of yhat corresponding to 2. Cross-entropy attempts to maximize the log-likelihood given to the correct labels.
@@ -168,7 +169,7 @@ def cross_entropy(yhat, y):
 For this example we'll be using the same stochastic gradient descent (SGD) optimizer as last time.
 
 ```{.python .input}
-def SGD(params, lr):    
+def SGD(params, lr):
     for param in params:
         param[:] = param - lr * param.grad
 ```
@@ -224,10 +225,10 @@ for e in range(epochs):
         niter +=1
         moving_loss = (1 - smoothing_constant) * moving_loss + (smoothing_constant) * nd.mean(loss).asscalar()
         est_loss = moving_loss/(1-(1-smoothing_constant)**niter)
-            
+
     test_accuracy = evaluate_accuracy(test_data, net)
     train_accuracy = evaluate_accuracy(train_data, net)
-    print("Epoch %s. Loss: %s, Train_acc %s, Test_acc %s" % (e, est_loss, train_accuracy, test_accuracy))       
+    print("Epoch %s. Loss: %s, Train_acc %s, Test_acc %s" % (e, est_loss, train_accuracy, test_accuracy))
 ```
 
 ## Using the model for prediction
@@ -247,7 +248,7 @@ for i, (data, label) in enumerate(sample_data):
     im = nd.transpose(data,(1,0,2,3))
     im = nd.reshape(im,(28,10*28,1))
     imtiles = nd.tile(im, (1,1,3))
-    
+
     plt.imshow(imtiles.asnumpy())
     plt.show()
     pred=model_predict(net,data.reshape((-1,784)))
@@ -259,7 +260,7 @@ for i, (data, label) in enumerate(sample_data):
 
 Jeepers. We can get nearly 90% accuracy at this task just by training a linear model for a few seconds! You might reasonably conclude that this problem is too easy to be taken seriously by experts.
 
-But until recently, many papers (Google Scholar says 13,800) were published using results obtained on this data. Even this year, I reviewed a paper whose primary achievement was an (imagined) improvement in performance. While MNIST can be a nice toy dataset for testing new ideas, we don't recommend writing papers with it. 
+But until recently, many papers (Google Scholar says 13,800) were published using results obtained on this data. Even this year, I reviewed a paper whose primary achievement was an (imagined) improvement in performance. While MNIST can be a nice toy dataset for testing new ideas, we don't recommend writing papers with it.
 
 ## Next
 [Softmax regression with gluon](../chapter02_supervised-learning/softmax-regression-gluon.ipynb)

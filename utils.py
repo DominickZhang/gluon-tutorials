@@ -8,6 +8,8 @@ class DataLoader(object):
     def __init__(self, X, y, batch_size, shuffle):
         self.batch_size = batch_size
         self.shuffle = shuffle
+        if not isinstance(y, nd.NDArray):
+            y = nd.array(y)
         self.X = X
         self.y = y
 
