@@ -32,4 +32,5 @@ received contributions spanning typo corrections through full working examples.
    chapter03_deep-neural-networks/index
    chapter04_convolutional-neural-networks/index
    chapter06_optimization/index
+   chapter07_distributed-learning/index
 ```
