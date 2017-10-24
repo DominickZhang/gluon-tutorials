@@ -8,6 +8,9 @@ import mxnet as mx
 import numpy as np
 from mxnet import nd, autograd
 from mxnet import gluon
+import sys
+sys.path.append('..')
+import utils
 ```
 
 We'll also want to set the compute context for our modeling. Feel free to go ahead and change this to mx.gpu(0) if you're running on an appropriately endowed machine.
@@ -19,15 +22,9 @@ ctx = mx.cpu()
 ## The MNIST dataset
 
 ```{.python .input  n=3}
-batch_size = 64
-num_inputs = 784
 num_outputs = 10
-def transform(data, label):
-    return data.astype(np.float32)/255, label.astype(np.float32)
-train_data = mx.gluon.data.DataLoader(mx.gluon.data.vision.MNIST(train=True, transform=transform),
-                                      batch_size, shuffle=True)
-test_data = mx.gluon.data.DataLoader(mx.gluon.data.vision.MNIST(train=False, transform=transform),
-                                     batch_size, shuffle=False)
+batch_size = 64
+train_data, test_data = utils.load_mnist(batch_size)
 ```
 
 ## Define the model

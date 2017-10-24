@@ -116,6 +116,10 @@ import mxnet as mx
 import numpy as np
 from mxnet import nd, autograd
 import numpy as np
+import sys
+sys.path.append('..')
+import utils
+
 mx.random.seed(1)
 ctx = mx.cpu()
 ```
@@ -127,14 +131,8 @@ Let's go ahead and grab our data.
 [**SWITCH TO CIFAR TO GET BETTER FEEL FOR REGULARIZATION**]
 
 ```{.python .input  n=2}
-mnist = mx.test_utils.get_mnist()
 batch_size = 64
-def transform(data, label):
-    return data.astype(np.float32)/255, label.astype(np.float32)
-train_data = mx.gluon.data.DataLoader(mx.gluon.data.vision.MNIST(train=True, transform=transform),
-                                      batch_size, shuffle=True)
-test_data = mx.gluon.data.DataLoader(mx.gluon.data.vision.MNIST(train=False, transform=transform),
-                                     batch_size, shuffle=False)
+train_data, test_data = utils.load_mnist(batch_size)
 ```
 
 ```{.python .input  n=3}

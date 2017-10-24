@@ -16,14 +16,16 @@ We've already seen how ``gluon`` can keep track of when to record vs not record 
 Since this is a ``gluon`` implementation chapter,
 let's get intro the thick of things by importing our dependencies and some toy data.
 
-
-
 ```{.python .input}
 from __future__ import print_function
 import mxnet as mx
 import numpy as np
 from mxnet import nd, autograd
 from mxnet import gluon
+import sys
+sys.path.append('..')
+import utils
+
 ctx = mx.cpu()
 
 ```
@@ -32,19 +34,13 @@ ctx = mx.cpu()
 
 ```{.python .input}
 batch_size = 64
-num_inputs = 784
 num_outputs = 10
-def transform(data, label):
-    return data.astype(np.float32)/255, label.astype(np.float32)
-train_data = mx.gluon.data.DataLoader(mx.gluon.data.vision.MNIST(train=True, transform=transform),
-                                      batch_size, shuffle=True)
-test_data = mx.gluon.data.DataLoader(mx.gluon.data.vision.MNIST(train=False, transform=transform),
-                                     batch_size, shuffle=False)
+train_data, test_data = utils.load_mnist(batch_size)
 ```
 
 ## Define the model
 
-Now we can add Dropout following each of our hidden layers. 
+Now we can add Dropout following each of our hidden layers.
 
 ```{.python .input}
 num_hidden = 256
@@ -127,7 +123,7 @@ By default this falue is ``False`` in the global scope.
 This way if someone just wants to make predictions and 
 doesn't know anything about training models, everything will just work.
 When we enter a ``train_mode()`` block, 
-we create a scope in which ``is_training()`` returns ``True``. 
+we create a scope in which ``is_training()`` returns ``True``.
 
 ```{.python .input}
 with autograd.predict_mode():
@@ -151,7 +147,6 @@ we still want to evaluate the model's training behavior.
 
 A problem then arises. Since ``record()`` and ``train_mode()``
 are distinct, how do we avoid having to declare two scopes every time we train the model?
-
 
 ```{.python .input}
 ##########################
@@ -225,16 +220,6 @@ for e in range(epochs):
     train_accuracy = evaluate_accuracy(train_data, net)
     print("Epoch %s. Loss: %s, Train_acc %s, Test_acc %s" %
           (e, moving_loss, train_accuracy, test_accuracy))
-```
-
-```{.json .output n=17}
-[
- {
-  "name": "stdout",
-  "output_type": "stream",
-  "text": "Epoch 9. Loss: 0.121087726722, Train_acc 0.986133333333, Test_acc 0.9774\n"
- }
-]
 ```
 
 ## Conclusion
