@@ -5,6 +5,10 @@ Powerful ML libraries can eliminate repetitive work, but if you rely too much on
 ```{.python .input}
 import mxnet as mx
 from mxnet import nd, autograd
+import sys
+sys.path.append('..')
+import utils
+
 mx.random.seed(1)
 ```
 
@@ -30,11 +34,10 @@ To make things easy, we're going to work with synthetic data where we know the s
 In mathematical notation we'd say that the true labeling function is 
 $$y = X \cdot w + b + \eta, \quad \text{for } \eta \sim \mathcal{N}(0,\sigma^2)$$
 
-
 ```{.python .input}
 num_inputs = 2
 num_outputs = 1
-num_examples = 10000
+num_examples = 1000
 
 def real_fn(X):
     return 2 * X[:, 0] - 3.4 * X[:, 1] + 4.2
@@ -44,7 +47,7 @@ noise = .01 * nd.random_normal(shape=(num_examples,))
 y = real_fn(X) + noise
 ```
 
-Notice that each row in ``X`` consists of a 2-dimensional data point and that each row in ``Y`` consists of a 1-dimensional target value. 
+Notice that each row in ``X`` consists of a 2-dimensional data point and that each row in ``Y`` consists of a 1-dimensional target value.
 
 ```{.python .input}
 print(X[0])
@@ -73,8 +76,7 @@ Once we start working with neural networks, we're going to need to iterate throu
 
 ```{.python .input}
 batch_size = 4
-train_data = mx.gluon.data.DataLoader(mx.gluon.data.ArrayDataset(X, y),
-                                      batch_size=batch_size, shuffle=True)
+train_data = utils.DataLoader(X, y, batch_size=batch_size, shuffle=True)
 ```
 
 Once we've initialized our DataLoader (``train_data``), we can easily fetch batches by calling ``train_data.next()``. ``batch.data`` gives us a list of inputs. Because our model has only one input (``X``), we'll just be grabbing ``batch.data[0]``.
@@ -124,7 +126,7 @@ Ok, that was easy.
 
 ## Loss function
 
-Train a model means making it better and better over the course of a period of training. But in order for this goal to make any sense at all, we first need to define what *better* means in the first place. In this case, we'll use the squared distance between our prediction and the true value. 
+Train a model means making it better and better over the course of a period of training. But in order for this goal to make any sense at all, we first need to define what *better* means in the first place. In this case, we'll use the squared distance between our prediction and the true value.
 
 ```{.python .input}
 def square_loss(yhat, y): 
@@ -133,7 +135,7 @@ def square_loss(yhat, y):
 
 ## Optimizer
 
-It turns out that linear regression actually has a closed-form solution. However, most interesting models that we'll care about cannot be solved analytically. So we'll solve this problem by stochastic gradient descent. At each step, we'll estimate the gradient of the loss with respect to our weights, using one batch randomly drawn from our dataset. Then, we'll update our parameters a small amount in the direction that reduces the loss. The size of the step is determined by the *learning rate* ``lr``. 
+It turns out that linear regression actually has a closed-form solution. However, most interesting models that we'll care about cannot be solved analytically. So we'll solve this problem by stochastic gradient descent. At each step, we'll estimate the gradient of the loss with respect to our weights, using one batch randomly drawn from our dataset. Then, we'll update our parameters a small amount in the direction that reduces the loss. The size of the step is determined by the *learning rate* ``lr``.
 
 ```{.python .input}
 def SGD(params, lr):    
@@ -166,7 +168,7 @@ def plot(losses, X, sample_size=100):
 ```
 
 ```{.python .input}
-epochs = 2
+epochs = 5
 ctx = mx.cpu()
 learning_rate = .001
 smoothing_constant = .01
@@ -196,8 +198,7 @@ for e in range(epochs):
         # correct the bias from the moving averages
         est_loss = moving_loss/(1-(1-smoothing_constant)**niter)
 
-        if (i + 1) % 500 == 0:
-            print("Epoch %s, batch %s. Moving avg of loss: %s" % (e, i, est_loss))
+        if (i + 1) % 10 == 0:
             losses.append(est_loss)
             
     plot(losses, X)
