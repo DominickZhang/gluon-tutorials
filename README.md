@@ -2,7 +2,7 @@
 
 This is staging repo for https://github.com/zackchase/mxnet-the-straight-dope
 
-The reason for creating another repo is 
+The reason for creating another repo is
 
 - Easy to setup CI
 - Not introduce too many errors into the original repo
