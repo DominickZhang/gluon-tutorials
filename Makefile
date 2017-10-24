@@ -1,6 +1,6 @@
 all: html
 
-build/%.ipynb: %.md environment.yml utils.py
+build/%.ipynb: %.md
 	@mkdir -p $(@D)
 	cd $(@D); python ../md2ipynb.py ../../$< ../../$@
 

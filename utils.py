@@ -1,3 +1,4 @@
+import mxnet as mx
 from mxnet import gluon
 from mxnet import nd
 import numpy as np
@@ -44,3 +45,12 @@ def load_mnist(batch_size, resize=None):
     train_data = DataLoader(mnist_train[0], nd.array(mnist_train[1]), batch_size, shuffle=True)
     test_data = DataLoader(mnist_test[0], nd.array(mnist_test[1]), batch_size, shuffle=False)
     return (train_data, test_data)
+
+def try_gpu():
+    """If GPU is available, return mx.gpu(0); else return mx.cpu()"""
+    try:
+        ctx = mx.gpu()
+        _ = nd.zeros((1,), ctx=ctx)
+    except:
+        ctx = mx.cpu()
+    return ctx
