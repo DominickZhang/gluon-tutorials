@@ -30,5 +30,6 @@ received contributions spanning typo corrections through full working examples.
    chapter01_crashcourse/index
    chapter02_supervised-learning/index
    chapter03_deep-neural-networks/index
-
+   chapter04_convolutional-neural-networks/index
+   chapter06_optimization/index
 ```
