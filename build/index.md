@@ -28,5 +28,7 @@ received contributions spanning typo corrections through full working examples.
    :maxdepth: 2
 
    chapter01_crashcourse/index
+   chapter02_supervised-learning/index
+   chapter03_deep-neural-networks/index
 
 ```
