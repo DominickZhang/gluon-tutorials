@@ -1,8 +1,8 @@
 # Multiclass logistic regression with ``gluon``
 
-Now that we've built a [logistic regression model from scratch](./softmax-regression-scratch.ipynb), let's make this more efficient with ``gluon``. If you completed the corresponding chapters on linear regression, you might be tempted rest your eyes a little in this one. We'll be using ``gluon`` in a rather similar way and since the interface is reasonably well designed, you won't have to do much work. To keep you awake we'll introduce a few subtle tricks. 
+Now that we've built a [logistic regression model from scratch](./softmax-regression-scratch.ipynb), let's make this more efficient with ``gluon``. If you completed the corresponding chapters on linear regression, you might be tempted rest your eyes a little in this one. We'll be using ``gluon`` in a rather similar way and since the interface is reasonably well designed, you won't have to do much work. To keep you awake we'll introduce a few subtle tricks.
 
-Let's start by importing the standard packages. 
+Let's start by importing the standard packages.
 
 ```{.python .input}
 from __future__ import print_function
@@ -10,6 +10,9 @@ import mxnet as mx
 from mxnet import nd, autograd
 from mxnet import gluon
 import numpy as np
+import sys
+sys.path.append('..')
+import utils
 ```
 
 ## Set the context
@@ -29,29 +32,24 @@ ctx = mx.cpu()
 We won't suck up too much wind describing the MNIST dataset for a second time. If you're unfamiliar with the dataset and are reading these chapters out of sequence, take a look at the data section in the previous chapter on [softmax regression from scratch](./P02-C03-softmax-regression-scratch.ipynb).
 
 
-We'll load up data iterators corresponding to the training and test splits of MNIST dataset. 
+We'll load up data iterators corresponding to the training and test splits of MNIST dataset.
 
 ```{.python .input}
 batch_size = 64
 num_inputs = 784
 num_outputs = 10
-def transform(data, label):
-    return data.astype(np.float32)/255, label.astype(np.float32)
-train_data = mx.gluon.data.DataLoader(mx.gluon.data.vision.MNIST(train=True, transform=transform),
-                                      batch_size, shuffle=True)
-test_data = mx.gluon.data.DataLoader(mx.gluon.data.vision.MNIST(train=False, transform=transform),
-                              batch_size, shuffle=False)
+train_data, test_data = utils.load_mnist(batch_size)
 ```
 
 We're also going to want to load up an iterator with *test* data. After we train on the training dataset we're going to want to test our model on the test data. Otherwise, for all we know, our model could be doing something stupid (or treacherous?) like memorizing the training examples and regurgitating the labels on command.
 
 ## Multiclass Logistic Regression
 
-Now we're going to define our model. 
+Now we're going to define our model.
 Remember from [our tutorial on linear regression with ``gluon``](./P02-C02-linear-regression-gluon)
-that we add ``Dense`` layers by calling ``net.add(gluon.nn.Dense(num_outputs))``. 
-This leaves the parameter shapes under-specified, 
-but ``gluon`` will infer the desired shapes 
+that we add ``Dense`` layers by calling ``net.add(gluon.nn.Dense(num_outputs))``.
+This leaves the parameter shapes under-specified,
+but ``gluon`` will infer the desired shapes
 the first time we pass real data through the network.
 
 
@@ -72,7 +70,7 @@ net.collect_params().initialize(mx.init.Normal(sigma=1.), ctx=ctx)
 
 ## Softmax Cross Entropy Loss
 
-Note, we didn't have to include the softmax layer because MXNet's has an efficient function that simultaneously computes the softmax activation and cross-entropy loss. However, if ever need to get the output probabilities, 
+Note, we didn't have to include the softmax layer because MXNet's has an efficient function that simultaneously computes the softmax activation and cross-entropy loss. However, if ever need to get the output probabilities,
 
 ```{.python .input}
 softmax_cross_entropy = gluon.loss.SoftmaxCrossEntropyLoss()
@@ -125,18 +123,18 @@ for e in range(epochs):
             loss = softmax_cross_entropy(output, label)
         loss.backward()
         trainer.step(batch_size)
-        
+
         ##########################
         #  Keep a moving average of the losses
         ##########################
         niter +=1
         moving_loss = (1 - smoothing_constant) * moving_loss + (smoothing_constant) * nd.mean(loss).asscalar()
         est_loss = moving_loss/(1-(1-smoothing_constant)**niter)
-        
+
     test_accuracy = evaluate_accuracy(test_data, net)
     train_accuracy = evaluate_accuracy(train_data, net)
-    print("Epoch %s. Loss: %s, Train_acc %s, Test_acc %s" % (e, est_loss, train_accuracy, test_accuracy))    
-    
+    print("Epoch %s. Loss: %s, Train_acc %s, Test_acc %s" % (e, est_loss, train_accuracy, test_accuracy))
+
 ```
 
 ```{.python .input}
@@ -155,7 +153,7 @@ for i, (data, label) in enumerate(sample_data):
     im = nd.transpose(data,(1,0,2,3))
     im = nd.reshape(im,(28,10*28,1))
     imtiles = nd.tile(im, (1,1,3))
-    
+
     plt.imshow(imtiles.asnumpy())
     plt.show()
     pred=model_predict(net,data.reshape((-1,784)))
