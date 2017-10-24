@@ -6,7 +6,7 @@ Up until now, we've presented two versions of each tutorial. One from scratch an
 
 In reality, writing every model completely from scratch can be cumbersome.  Just like there's only so many times a developer can code up a blog from scratch without hating life, there's only so many times that you'll want to write out a convolutional layer, or define the stochastic gradient descent updates. Even in a pure research environment, we usually want to customize one part of the model. For example, we might want to implement a new layer, but still rely on other common layers, loss functions, optimizers, etc. In some cases it might be nontrivial to compute the gradient efficiently and the automatic differentiation subsystem might need some help: When was the last time you performed backprop through a log-determinant, a Cholesky factorization, or a matrix exponential? In other cases things might not be numerically very stable when calculated straightforwardly (e.g. taking logs of exponentials of some arguments). 
 
-By hacking ``gluon``, we can get the desired flexibility in one part of our model, without screwing up everything else that makes our life easy. 
+By hacking ``gluon``, we can get the desired flexibility in one part of our model, without screwing up everything else that makes our life easy.
 
 ```{.python .input}
 from __future__ import print_function
@@ -15,6 +15,9 @@ import numpy as np
 from mxnet import nd, autograd, gluon
 from mxnet.gluon import nn, Block
 mx.random.seed(1)
+import sys
+sys.path.append('..')
+import utils
 
 ###########################
 #  Speficy the context we'll be using
@@ -25,12 +28,7 @@ ctx = mx.cpu()
 #  Load up our dataset
 ###########################
 batch_size = 64
-def transform(data, label):
-    return data.astype(np.float32)/255, label.astype(np.float32)
-train_data = mx.gluon.data.DataLoader(mx.gluon.data.vision.MNIST(train=True, transform=transform),
-                                      batch_size, shuffle=True)
-test_data = mx.gluon.data.DataLoader(mx.gluon.data.vision.MNIST(train=False, transform=transform),
-                                     batch_size, shuffle=False)
+train_data, test_data = utils.load_mnist(batch_size)
 ```
 
 ## Defining a (toy) custom layer
@@ -159,7 +157,7 @@ def relu(X):
     return nd.maximum(X, 0)
 ```
 
-Now we can define our ``Block``. 
+Now we can define our ``Block``.
 
 ```{.python .input}
 class MyDense(Block):
@@ -235,7 +233,7 @@ with net.name_scope():
 net.collect_params().initialize(ctx=ctx)
 ```
 
-## Instantiate a loss 
+## Instantiate a loss
 
 ```{.python .input}
 loss = gluon.loss.SoftmaxCrossEntropyLoss()
@@ -285,8 +283,7 @@ for e in range(epochs):
             
     test_accuracy = evaluate_accuracy(test_data, net)
     train_accuracy = evaluate_accuracy(train_data, net)
-    print("Epoch %s. Train_acc %s, Test_acc %s" % (e, train_accuracy, test_accuracy))    
-    
+    print("Epoch %s. Train_acc %s, Test_acc %s" % (e, train_accuracy, test_accuracy))
 ```
 
 ## Conclusion
