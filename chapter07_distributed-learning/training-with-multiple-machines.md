@@ -34,16 +34,6 @@ store.init('weight', x)
 print('=== init "weight" ==={}'.format(x))
 ```
 
-```{.json .output n=1}
-[
- {
-  "name": "stdout",
-  "output_type": "stream",
-  "text": "=== init \"weight\" ===\n[[ 0.79415995  0.88229781  0.15982462]\n [ 0.93108964  0.39078727  0.85333389]]\n<NDArray 2x3 @cpu(0)>\n"
- }
-]
-```
-
 After initialization, we can pull the value to multiple devices.
 
 ```{.python .input  n=2}
@@ -54,16 +44,6 @@ store.pull('weight', out=y)
 print('=== pull "weight" to {} ===\n{}'.format(ctx, y))
 ```
 
-```{.json .output n=2}
-[
- {
-  "name": "stdout",
-  "output_type": "stream",
-  "text": "=== pull \"weight\" to [gpu(0), gpu(1)] ===\n[\n[[ 0.79415995  0.88229781  0.15982462]\n [ 0.93108964  0.39078727  0.85333389]]\n<NDArray 2x3 @gpu(0)>, \n[[ 0.79415995  0.88229781  0.15982462]\n [ 0.93108964  0.39078727  0.85333389]]\n<NDArray 2x3 @gpu(1)>]\n"
- }
-]
-```
-
 We can also push new data value into the store. It will first sum the data on the same key and then overwrite the current value.
 
 ```{.python .input  n=3}
@@ -72,16 +52,6 @@ store.push('weight', z)
 print('=== push to "weight" ===\n{}'.format(z))
 store.pull('weight', out=y)
 print('=== pull "weight" ===\n{}'.format(y))
-```
-
-```{.json .output n=3}
-[
- {
-  "name": "stdout",
-  "output_type": "stream",
-  "text": "=== push to \"weight\" ===\n[\n[[ 1.  1.  1.]\n [ 1.  1.  1.]]\n<NDArray 2x3 @gpu(0)>, \n[[ 2.  2.  2.]\n [ 2.  2.  2.]]\n<NDArray 2x3 @gpu(1)>]\n=== pull \"weight\" ===\n[\n[[ 3.  3.  3.]\n [ 3.  3.  3.]]\n<NDArray 2x3 @gpu(0)>, \n[[ 3.  3.  3.]\n [ 3.  3.  3.]]\n<NDArray 2x3 @gpu(1)>]\n"
- }
-]
 ```
 
 With `push` and `pull` we can replace the `allreduce` function defined in [multiple-gpus-scratch](P14-C02-multiple-gpus-scratch.ipynb) by

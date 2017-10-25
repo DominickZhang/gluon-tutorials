@@ -22,19 +22,6 @@ def fancy_func(A, B, C, D):
 fancy_func(1,2,3,4)
 ```
 
-```{.json .output n=1}
-[
- {
-  "data": {
-   "text/plain": "10"
-  },
-  "execution_count": 1,
-  "metadata": {},
-  "output_type": "execute_result"
- }
-]
-```
-
 As you might expect when we compute `E`, we're actually performing some numerical operation, like multiplication, and returning an array that we assign to the variable `E`. Same for `F`. And if we want to do a similar computation many times by putting these lines in a function, each time our program *will have to step through these three lines of Python*. 
 
 The advantage of this approach is it's so natural that it might not even occur to some people that there is another way. But the disadvantage is that it's slow. That's because we are constantly engaging the Python execution environment (which is slow) even though our entire function performs the same three low-level operations in the same sequence every time. It's also holding on to all the intermediate values `D` and `E` until the function returns even though we can see that they're not needed. We might have made this program more efficient by re-using memory from either `E` or `F` to store the result `G`. 
@@ -77,16 +64,6 @@ print(fancy_func(1,2,3,4))
 prog = evoke_str()
 y = compile(prog, '', 'exec')
 exec(y)
-```
-
-```{.json .output n=2}
-[
- {
-  "name": "stdout",
-  "output_type": "stream",
-  "text": "10\n"
- }
-]
 ```
 
 Here, when we run the line ``fancy_func_str()``, *no numerical computation actually happens*.
@@ -176,31 +153,11 @@ net = get_net()
 print('=== net(x) ==={}'.format(net(x)))
 ```
 
-```{.json .output n=4}
-[
- {
-  "name": "stdout",
-  "output_type": "stream",
-  "text": "=== net(x) ===\n[[ 0.13706432  0.2319649 ]]\n<NDArray 1x2 @cpu(0)>\n"
- }
-]
-```
-
 To compile and optimize the `HybridSequential`, we can then call its `hybridize` method. Only `HybridBlock`s, e.g. `HybridSequential`, can be compiled. But you can still call `hybridize` on normal `Block` and its `HybridBlock` children will be compiled instead. We will talk more about ``HybridBlock``s later.
 
 ```{.python .input  n=5}
 net.hybridize()
 print('=== net(x) ==={}'.format(net(x)))
-```
-
-```{.json .output n=5}
-[
- {
-  "name": "stdout",
-  "output_type": "stream",
-  "text": "=== net(x) ===\n[[ 0.13706432  0.2319649 ]]\n<NDArray 1x2 @cpu(0)>\n"
- }
-]
 ```
 
 ## Performance
@@ -225,16 +182,6 @@ net.hybridize()
 print('After hybridizing: %.4f sec'%(bench(net, x)))
 ```
 
-```{.json .output n=6}
-[
- {
-  "name": "stdout",
-  "output_type": "stream",
-  "text": "Before hybridizing: 0.6163 sec\nAfter hybridizing: 0.2587 sec\n"
- }
-]
-```
-
 As you can see, hybridizing gives a significant performance boost, almost 2x the speed.
 
 ## Get the symbolic program
@@ -254,16 +201,6 @@ print(y)
 y_json = y.tojson()
 print('\n=== the according json definition===')
 print(y_json)
-```
-
-```{.json .output n=7}
-[
- {
-  "name": "stdout",
-  "output_type": "stream",
-  "text": "=== input data holder ===\n<Symbol data>\n\n=== the symbolic program of net===\n<Symbol hybridsequential1_dense2_fwd>\n\n=== the according json definition===\n{\n  \"nodes\": [\n    {\n      \"op\": \"null\", \n      \"name\": \"data\", \n      \"inputs\": []\n    }, \n    {\n      \"op\": \"null\", \n      \"name\": \"hybridsequential1_dense0_weight\", \n      \"attr\": {\n        \"__dtype__\": \"0\", \n        \"__lr_mult__\": \"1.0\", \n        \"__shape__\": \"(256, 0)\", \n        \"__wd_mult__\": \"1.0\"\n      }, \n      \"inputs\": []\n    }, \n    {\n      \"op\": \"null\", \n      \"name\": \"hybridsequential1_dense0_bias\", \n      \"attr\": {\n        \"__dtype__\": \"0\", \n        \"__init__\": \"zeros\", \n        \"__lr_mult__\": \"1.0\", \n        \"__shape__\": \"(256,)\", \n        \"__wd_mult__\": \"1.0\"\n      }, \n      \"inputs\": []\n    }, \n    {\n      \"op\": \"FullyConnected\", \n      \"name\": \"hybridsequential1_dense0_fwd\", \n      \"attr\": {\n        \"flatten\": \"True\", \n        \"no_bias\": \"False\", \n        \"num_hidden\": \"256\"\n      }, \n      \"inputs\": [[0, 0, 0], [1, 0, 0], [2, 0, 0]]\n    }, \n    {\n      \"op\": \"Activation\", \n      \"name\": \"hybridsequential1_dense0_relu_fwd\", \n      \"attr\": {\"act_type\": \"relu\"}, \n      \"inputs\": [[3, 0, 0]]\n    }, \n    {\n      \"op\": \"null\", \n      \"name\": \"hybridsequential1_dense1_weight\", \n      \"attr\": {\n        \"__dtype__\": \"0\", \n        \"__lr_mult__\": \"1.0\", \n        \"__shape__\": \"(128, 0)\", \n        \"__wd_mult__\": \"1.0\"\n      }, \n      \"inputs\": []\n    }, \n    {\n      \"op\": \"null\", \n      \"name\": \"hybridsequential1_dense1_bias\", \n      \"attr\": {\n        \"__dtype__\": \"0\", \n        \"__init__\": \"zeros\", \n        \"__lr_mult__\": \"1.0\", \n        \"__shape__\": \"(128,)\", \n        \"__wd_mult__\": \"1.0\"\n      }, \n      \"inputs\": []\n    }, \n    {\n      \"op\": \"FullyConnected\", \n      \"name\": \"hybridsequential1_dense1_fwd\", \n      \"attr\": {\n        \"flatten\": \"True\", \n        \"no_bias\": \"False\", \n        \"num_hidden\": \"128\"\n      }, \n      \"inputs\": [[4, 0, 0], [5, 0, 0], [6, 0, 0]]\n    }, \n    {\n      \"op\": \"Activation\", \n      \"name\": \"hybridsequential1_dense1_relu_fwd\", \n      \"attr\": {\"act_type\": \"relu\"}, \n      \"inputs\": [[7, 0, 0]]\n    }, \n    {\n      \"op\": \"null\", \n      \"name\": \"hybridsequential1_dense2_weight\", \n      \"attr\": {\n        \"__dtype__\": \"0\", \n        \"__lr_mult__\": \"1.0\", \n        \"__shape__\": \"(2, 0)\", \n        \"__wd_mult__\": \"1.0\"\n      }, \n      \"inputs\": []\n    }, \n    {\n      \"op\": \"null\", \n      \"name\": \"hybridsequential1_dense2_bias\", \n      \"attr\": {\n        \"__dtype__\": \"0\", \n        \"__init__\": \"zeros\", \n        \"__lr_mult__\": \"1.0\", \n        \"__shape__\": \"(2,)\", \n        \"__wd_mult__\": \"1.0\"\n      }, \n      \"inputs\": []\n    }, \n    {\n      \"op\": \"FullyConnected\", \n      \"name\": \"hybridsequential1_dense2_fwd\", \n      \"attr\": {\n        \"flatten\": \"True\", \n        \"no_bias\": \"False\", \n        \"num_hidden\": \"2\"\n      }, \n      \"inputs\": [[8, 0, 0], [9, 0, 0], [10, 0, 0]]\n    }\n  ], \n  \"arg_nodes\": [0, 1, 2, 5, 6, 9, 10], \n  \"node_row_ptr\": [\n    0, \n    1, \n    2, \n    3, \n    4, \n    5, \n    6, \n    7, \n    8, \n    9, \n    10, \n    11, \n    12\n  ], \n  \"heads\": [[11, 0, 0]], \n  \"attrs\": {\"mxnet_version\": [\"int\", 1200]}\n}\n"
- }
-]
 ```
 
 Now we can save both the program and parameters onto disk, so that it can be loaded later not only in Python, but in all other supported languages, such as C++, R, and Scala, as well.
@@ -323,16 +260,6 @@ print('=== 2nd forward ===')
 y = net(x)
 ```
 
-```{.json .output n=10}
-[
- {
-  "name": "stdout",
-  "output_type": "stream",
-  "text": "=== 1st forward ===\ntype(x): NDArray, F: mxnet.ndarray\n=== 2nd forward ===\ntype(x): NDArray, F: mxnet.ndarray\n"
- }
-]
-```
-
 Now run it again after hybridizing.
 
 ```{.python .input  n=11}
@@ -341,16 +268,6 @@ print('=== 1st forward ===')
 y = net(x)
 print('=== 2nd forward ===')
 y = net(x)
-```
-
-```{.json .output n=11}
-[
- {
-  "name": "stdout",
-  "output_type": "stream",
-  "text": "=== 1st forward ===\ntype(x): Symbol, F: mxnet.symbol\n=== 2nd forward ===\n"
- }
-]
 ```
 
 It differs from the previous execution in two aspects:
