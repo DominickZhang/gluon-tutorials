@@ -1,5 +1,4 @@
-
-# Crashcouese
+# Crashcourse
 
 ```eval_rst
 
