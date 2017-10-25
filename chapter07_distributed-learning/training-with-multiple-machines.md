@@ -1,19 +1,19 @@
 # Distributed training with multiple machines
 
-In the previous two tutorials, we saw 
-that using multiple GPUs within a machine 
-can accelerate training. 
-The speedup, however, is limited 
+In the previous two tutorials, we saw
+that using multiple GPUs within a machine
+can accelerate training.
+The speedup, however, is limited
 by the number of GPUs installed in that machine.
-And it's rare to find a single machine with more than 16 GPUs nowadays. 
-For some truly large-scale applications, 
+And it's rare to find a single machine with more than 16 GPUs nowadays.
+For some truly large-scale applications,
 this speedup might still be insufficient.
-For example, it could still take many days 
+For example, it could still take many days
 to train a state-of-the-art CNN on millions of images.
 
-In this tutorial, we'll discuss the key concepts you'll need 
+In this tutorial, we'll discuss the key concepts you'll need
 in order to go from a program that does single-machine training
-to one that executes distributed training across multiple machines. 
+to one that executes distributed training across multiple machines.
 We depict a typical distributed system in the following figure, where
 multiple machines are connected by network switches.
 
@@ -30,7 +30,7 @@ from mxnet import kv, nd
 store = kv.create('local')
 shape = (2, 3)
 x = nd.random_uniform(shape=shape)
-store.init('weight', x) 
+store.init('weight', x)
 print('=== init "weight" ==={}'.format(x))
 ```
 
@@ -109,7 +109,7 @@ Now if we run the code from the previous section on two machines at the same tim
 
 In the distributed setting, `MXNet` launches three kinds of processes (each time, running `python myprog.py` will create a process). One is a *worker*, which runs the user program, such as the code in the previous section. The other two are the *server*, which maintains the data pushed into the store, and the *scheduler*, which monitors the aliveness of each node.
 
-It's up to users which machines to run these processes on. But to simplify the process placement and launching, MXNet provides a tool located at [tools/launch.py](https://github.com/dmlc/mxnet/blob/master/tools/launch.py). 
+It's up to users which machines to run these processes on. But to simplify the process placement and launching, MXNet provides a tool located at [tools/launch.py](https://github.com/dmlc/mxnet/blob/master/tools/launch.py).
 
 Assume there are two machines, A and B. They are ssh-able, and their IPs are saved in a file named `hostfile`. Then we can start one worker in each machine through:
 
@@ -119,11 +119,11 @@ Assume there are two machines, A and B. They are ssh-able, and their IPs are sav
 
 It will also start a server in each machine, and the scheduler on the same machine we are currently on.
 
-![](img/dist_kv.svg)
+![](../img/dist_kv.svg)
 
 ## Using `kvstore` in `gluon`
 
-As mentioned in [our section on training with multiple GPUs from scratch](multiple-gpus-scratch.ipynb#data-parallelism), to implement data parallelism we just need to specify 
+As mentioned in [our section on training with multiple GPUs from scratch](multiple-gpus-scratch.ipynb#data-parallelism), to implement data parallelism we just need to specify
 
 - how to split data
 - how to synchronize gradients and weights

@@ -34,8 +34,14 @@ build/%: %
 html: $(DEPS) $(OBJ)
 	make -C build html
 
-pdf: $(DEPS) $(OBJ)
+SVG=$(wildcard img/*.svg)
+
+build/_build/latex/%.png: img/%.svg
+	convert $< $@
+
+pdf: $(DEPS) $(OBJ) $(patsubst img/%.svg, build/_build/latex/%.png, $(SVG))
 	make -C build latex
+	sed -i s/\.svg/\.png/ build/_build/latex/gluon_tutorials.tex
 	cd build/_build/latex; make
 
 clean:
